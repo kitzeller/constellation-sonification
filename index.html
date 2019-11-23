@@ -172,12 +172,6 @@
             //     autoplay: true
             // });
 
-            // Star glow
-            var gl = new BABYLON.GlowLayer("glow", scene);
-            gl.intensity = 0.5;
-            var starMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
-            starMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
-
             // Add earth
             var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
             groundMaterial.diffuseTexture = new BABYLON.Texture("earth.jpg", scene);
@@ -200,6 +194,11 @@
             // whirlpool.color = new BABYLON.Color3(1, 1, 1);
 
             // Constellation Stars
+            var gl = new BABYLON.GlowLayer("glow", scene);
+            gl.intensity = 0.5;
+            var starMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
+            starMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+
             var sphereMesh = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
             sphereMesh.material = starMaterial;
 
@@ -211,6 +210,14 @@
                 sphere.starId = star[0];
                 sphere.starBrightness = star[1];
                 starMap[star[0]] = sphere;
+                sphere.actionManager = new BABYLON.ActionManager(scene);
+                sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function(ev){
+                    scene.defaultCursor = "pointer";
+                }));
+
+                sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, function(ev){
+                    scene.defaultCursor = "grab";
+                }));
             }
 
             // Faint starts
