@@ -31,10 +31,21 @@
             background-image: url(https://snappygoat.com/b/e180cb63bb63dabbfdce2085a6d95dbd92e994e0);
             z-index: 9999;
         }
+
+        .overlay{
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 10px;
+            z-index: 10;
+            font-family: monospace;
+            color: white;
+        }
     </style>
 </head>
 <body>
 <div id="loadingScreen"></div>
+<div class="overlay">Click on any star in a constellation. Click multiple!</div>
 <canvas id="renderCanvas"></canvas>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.4.9/Tone.js"></script>
@@ -199,6 +210,7 @@
                     text1.shortName = line[0];
                     text1.color = "white";
                     text1.fontSize = 18;
+                    text1.fontFamily = "monospace";
                     advancedTexture.addControl(text1);
                     text1.linkWithMesh(starMap[line[3]]);
                     text1.linkOffsetY = 10;
