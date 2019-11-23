@@ -51,6 +51,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.4.9/Tone.js"></script>
 <script src="https://preview.babylonjs.com/babylon.js"></script>
 <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+<script src="https://unpkg.com/earcut@2.1.1/dist/earcut.min.js"></script>
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -249,7 +250,25 @@
                 }
             });
 
-            window.addEventListener("click", function () {
+            // $.getJSON("boundaries.json", function (bound) {
+            //     //Polygon shape in XoZ plane
+            //     for (let b of bound.boundaries) {
+            //         var shape = [];
+            //         for (let l = 1; l < b.length; l += 2) {
+            //             let ra = b[l];
+            //             let dc = b[l + 1];
+            //             let coords = getCart(ra, dc, 300);
+            //             console.log(coords);
+            //             shape.push(coords);
+            //         }
+            //         // var polygon = BABYLON.MeshBuilder.CreatePolygon("polygon", {shape:shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+            //         var filled_hex = BABYLON.Mesh.CreateRibbon("hex", [shape], true, false, 0, scene);
+            //         return;
+            //     }
+            // });
+
+
+                window.addEventListener("click", function () {
                 // We try to pick an object
                 var pickResult = scene.pick(scene.pointerX, scene.pointerY);
                 if (!pickResult.pickedMesh) return;
@@ -258,8 +277,6 @@
                 //hideAllBut(pickResult.pickedMesh.starConstellation)
 
                 let nextAnimation;
-                let animationBox;
-
                 var xSlide = new BABYLON.Animation("xSlide", "scaling", 10, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
                 var keyFramesP = [];
@@ -280,21 +297,18 @@
                 });
                 xSlide.setKeys(keyFramesP);
 
-                console.log(constellationStars[pickResult.pickedMesh.starConstellation].length );
                 for (let i = constellationStars[pickResult.pickedMesh.starConstellation].length - 1; i > 0; i--) {
 
                     if (nextAnimation) {
                         const myNext = nextAnimation;
                         let newNext = function () {
-                            // Mapped to Apparent magnitude
-                            sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness * 40));
-
+                            playNote(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness);
                             scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, myNext);
                         };
                         nextAnimation = newNext;
                     } else {
                         nextAnimation = function () {
-                            sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness * 40));
+                            playNote(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness);
                             scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, () => {
                                 //showAll(pickResult.pickedMesh.starConstellation);
                             });
@@ -303,8 +317,7 @@
                 }
 
                 scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][0], [xSlide], 0, 25, false, 1, nextAnimation);
-                sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][0].starBrightness * 40));
-
+                playNote(constellationStars[pickResult.pickedMesh.starConstellation][0].starBrightness);
             });
 
             engine.hideLoadingUI();
@@ -333,6 +346,17 @@
         });
 
     });
+
+    function playNote(brightness){
+        // TODO: Better scale
+        // Mapped to Apparent magnitude
+        if (!brightness) return;
+        let note = Math.floor(brightness * 40);
+        console.log(note);
+        if (note < 0) return;
+        sampler.triggerAttack(note);
+
+    }
 
     function hideAllBut(con) {
         for (let s of Object.values(starMap)) {
