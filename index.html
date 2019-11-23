@@ -37,6 +37,7 @@
 <div id="loadingScreen"></div>
 <canvas id="renderCanvas"></canvas>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.4.9/Tone.js"></script>
 <script src="https://preview.babylonjs.com/babylon.js"></script>
 <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
 <script
@@ -46,13 +47,33 @@
 <script>
     var canvas = document.getElementById("renderCanvas"); // Get the canvas element
     var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-
+    var camera;
     //
     var loadingScreenDiv = window.document.getElementById("loadingScreen");
+
+    // Tone
+    var synth = new Tone.Synth().toMaster();
+    var reverb = new Tone.Convolver('https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/hm2_000_ortf_48k.mp3').toMaster();
+
+    var sampler = new Tone.Sampler({
+        C3: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-c3.mp3',
+        'D#3': 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-ds3.mp3',
+        'F#3': 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-fs3.mp3',
+        A3: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-a3.mp3',
+        C4: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-c4.mp3',
+        'D#4': 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-ds4.mp3',
+        'F#4': 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-fs4.mp3',
+        A4: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-a4.mp3',
+        C5: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-c5.mp3',
+        'D#5': 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-ds5.mp3',
+        'F#5': 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-fs5.mp3',
+        A5: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/969699/plastic-marimba-a5.mp3'
+    }).connect(reverb);
 
     function customLoadingScreen() {
         console.log("customLoadingScreen creation")
     }
+
     customLoadingScreen.prototype.displayLoadingUI = function () {
         console.log("customLoadingScreen loading")
         loadingScreenDiv.innerHTML = "<br><br><br><br><br><br><br>Loading the galaxy and stars...";
@@ -69,6 +90,9 @@
     // engine.loadingUIText = "Loading universe..."
 
     var starMap = {};
+    var constellationStars = {};
+    var starConsellations = {};
+    var constellationText = {};
     $.getJSON("stars.json", function (json) {
 
         /******* Add the create scene function ******/
@@ -80,7 +104,7 @@
 
             // Add a camera to the scene and attach it to the canvas
             // var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, new BABYLON.Vector3(0, 0, 5), scene);
-            var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, 0), scene);
+            camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, 0), scene);
             camera.attachControl(canvas, true);
 
             // Add lights to the scene
@@ -89,6 +113,7 @@
 
             // Space background
             var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000.0, scene);
+            skybox.isPickable = false;
             var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
             skyboxMaterial.backFaceCulling = false;
             var files = [
@@ -106,10 +131,10 @@
             skyboxMaterial.disableLighting = true;
             skybox.material = skyboxMaterial;
 
-            var music = new BABYLON.Sound("Music", "271866__mrpork__era-of-space.ogg", scene, null, {
-                loop: true,
-                autoplay: true
-            });
+            // var music = new BABYLON.Sound("Music", "271866__mrpork__era-of-space.ogg", scene, null, {
+            //     loop: true,
+            //     autoplay: true
+            // });
 
             // Star glow
             var gl = new BABYLON.GlowLayer("glow", scene);
@@ -123,6 +148,7 @@
             var earth = BABYLON.MeshBuilder.CreateSphere("sun", {diameter: 3}, scene);
             earth.material = groundMaterial;
             earth.rotation.x = Math.PI;
+            earth.isPickable = false;
 
             // Create a whirlpool
             // var points = [];
@@ -138,35 +164,52 @@
             // whirlpool.color = new BABYLON.Color3(1, 1, 1);
 
             // Constellation Stars
+            var sphereMesh = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
+            sphereMesh.material = starMaterial;
+
             for (let star of starData) {
-                let coords = getCart(star[3], star[2], 400);
-                var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
-                sphere.setPositionWithLocalVector(coords);
-                sphere.material = starMaterial;
+                let coords = getCart(star[3], star[2], 250);
+                let sphere = sphereMesh.createInstance("i" + star[0]);
+                sphere.position = coords;
+                // sphere.material = starMaterial;
                 sphere.starId = star[0];
+                sphere.starBrightness = star[1];
                 starMap[star[0]] = sphere;
             }
 
             // Faint starts
             for (let star of json.stars) {
                 let coords = getCart(star[3], star[2], 700);
-                var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
-                sphere.setPositionWithLocalVector(coords);
-                sphere.material = starMaterial;
+                let sphere = sphereMesh.createInstance("i" + star[0]);
+                sphere.position = coords;
+                // sphere.material = starMaterial;
                 sphere.starId = star[0];
+                sphere.starBrightness = star[1];
+                sphere.isPickable = false;
                 starMap[star[0]] = sphere;
             }
+
+            sphereMesh.setEnabled(false);
 
             $.getJSON("lines_latin.json", function (lines) {
                 console.log(starMap);
                 for (let line of lines.lines) {
                     var text1 = new BABYLON.GUI.TextBlock();
                     text1.text = consellations[line[0]];
+                    text1.shortName = line[0];
                     text1.color = "white";
                     text1.fontSize = 18;
                     advancedTexture.addControl(text1);
                     text1.linkWithMesh(starMap[line[3]]);
                     text1.linkOffsetY = 10;
+                    // starMap[line[3]].onPointerClickObservable.add(function () {
+                    //     console.log("woooo");
+                    //     hideAllBut(starMap[line[3]].starConstellation);
+                    // });
+
+                    if (starConsellations[line[0]] === undefined) starConsellations[line[0]] = [];
+                    if (constellationStars[line[0]] === undefined) constellationStars[line[0]] = [];
+                    constellationText[line[0]] = text1;
 
                     for (let l = 3; l < line.length; l += 2) {
                         idx1 = line[l];
@@ -175,22 +218,97 @@
                         let st1 = starMap[idx1];
                         let st2 = starMap[idx2];
 
+                        if (!constellationStars[line[0]].includes(st1)) constellationStars[line[0]].push(st1);
+                        if (!constellationStars[line[0]].includes(st2)) constellationStars[line[0]].push(st2);
+
                         if (st1 == undefined || st2 == undefined) continue;
+
+                        st1.starConstellation = line[0];
+                        st2.starConstellation = line[0];
 
                         var myPoints = [
                             new BABYLON.Vector3(st1.position.x, st1.position.y, st1.position.z),
                             new BABYLON.Vector3(st2.position.x, st2.position.y, st2.position.z)
                         ];
                         var myLine = BABYLON.MeshBuilder.CreateLines("lines", {points: myPoints}, scene);
+                        myLine.starConstellation = line[0];
+                        starConsellations[line[0]].push(myLine);
                     }
                 }
             });
+
+            window.addEventListener("click", function () {
+                // We try to pick an object
+                var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+                if (!pickResult.pickedMesh) return;
+                if (!pickResult.pickedMesh.starConstellation) return;
+                // synth.triggerAttackRelease("C5", "8n");
+                hideAllBut(pickResult.pickedMesh.starConstellation)
+
+                let nextAnimation;
+                let animationBox;
+
+                var xSlide = new BABYLON.Animation("xSlide", "scaling", 10, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+                var keyFramesP = [];
+
+                keyFramesP.push({
+                    frame: 0,
+                    value: new BABYLON.Vector3(5, 5, 5)
+                });
+
+                keyFramesP.push({
+                    frame: 15,
+                    value: new BABYLON.Vector3(10, 10, 10)
+                });
+
+                keyFramesP.push({
+                    frame: 25,
+                    value: new BABYLON.Vector3(1, 1, 1)
+                });
+                xSlide.setKeys(keyFramesP);
+
+                console.log(constellationStars[pickResult.pickedMesh.starConstellation].length );
+                for (let i = constellationStars[pickResult.pickedMesh.starConstellation].length - 1; i > 0; i--) {
+
+                    if (nextAnimation) {
+                        const myNext = nextAnimation;
+                        let newNext = function () {
+                            // Mapped to Apparent magnitude
+                            sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness * 40));
+
+                            scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, myNext);
+                        };
+                        nextAnimation = newNext;
+                    } else {
+                        nextAnimation = function () {
+                            sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness * 40));
+                            scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, () => {
+                                showAll(pickResult.pickedMesh.starConstellation);
+                            });
+                        }
+                    }
+                }
+
+                scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][0], [xSlide], 0, 25, false, 1, nextAnimation);
+                sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][0].starBrightness * 40));
+
+            });
+
             engine.hideLoadingUI();
             return scene;
         };
         /******* End of the create scene function ******/
 
         var scene = createScene(); //Call the createScene function
+
+        function createNextAnimation(mesh, index, max) {
+            if (index == max - 1) return;
+            return scene.beginAnimation(mesh[0], 0, 100, true, 1, () => {
+                // on animation end
+                createNextAnimation(mesh[index], index + 1, max);
+            }).pause();
+        }
 
         // Register a render loop to repeatedly render the scene
         engine.runRenderLoop(function () {
@@ -203,6 +321,41 @@
         });
 
     });
+
+    function hideAllBut(con) {
+        for (let s of Object.values(starMap)) {
+            if (s.starConstellation != con) {
+                s.setEnabled(false);
+            }
+
+        }
+        for (let c of Object.keys(starConsellations)) {
+            if (c == con) continue;
+            for (let l of starConsellations[c]) {
+                l.setEnabled(false);
+            }
+        }
+
+        for (let t of Object.keys(constellationText)) {
+            if (t == con) continue;
+            constellationText[t].isVisible = false;
+        }
+    }
+
+    function showAll(con) {
+        for (let s of Object.values(starMap)) {
+                s.setEnabled(true);
+        }
+        for (let c of Object.keys(starConsellations)) {
+            for (let l of starConsellations[c]) {
+                l.setEnabled(true);
+            }
+        }
+
+        for (let t of Object.keys(constellationText)) {
+            constellationText[t].isVisible = true;
+        }
+    }
 
     // Constellation stars
     var starData = [[677, 2.1, 2.097, 29.09], [746, 2.3, 2.295, 59.15], [765, 3.9, 2.353, -45.75],
