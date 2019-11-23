@@ -139,7 +139,7 @@
 
             // Constellation Stars
             for (let star of starData) {
-                let coords = getCart(star[3], star[2], 200);
+                let coords = getCart(star[3], star[2], 400);
                 var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
                 sphere.setPositionWithLocalVector(coords);
                 sphere.material = starMaterial;
@@ -149,7 +149,7 @@
 
             // Faint starts
             for (let star of json.stars) {
-                let coords = getCart(star[3], star[2], 500);
+                let coords = getCart(star[3], star[2], 700);
                 var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2}, scene);
                 sphere.setPositionWithLocalVector(coords);
                 sphere.material = starMaterial;
@@ -163,7 +163,7 @@
                     var text1 = new BABYLON.GUI.TextBlock();
                     text1.text = consellations[line[0]];
                     text1.color = "white";
-                    text1.fontSize = 24;
+                    text1.fontSize = 18;
                     advancedTexture.addControl(text1);
                     text1.linkWithMesh(starMap[line[3]]);
                     text1.linkOffsetY = 10;
