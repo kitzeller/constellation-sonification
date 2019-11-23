@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Constellation Sonification</title>
-    <meta name="title" content="Constellation Sonification">
-    <meta name="description" content="The music of stars.">
+    <meta name="title" content="Constellation Sonification"/>
+    <meta name="description" content="The music of stars."/>
 
-    <meta property="og:title" content="Constellation Sonification">
-    <meta property="og:description" content="The music of stars.">
-    <meta property="og:image" content="constellations.png">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kitzeller.github.io/constellation-sonification">
-    <meta property="og:image:secure_url" content="constellations.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@kitzeller" />
-    <meta name="twitter:creator" content="@kitzeller" />
-    <meta name="twitter:domain" content="twitter.com/kitzeller" />
-    <meta name="twitter:title" content="Constellation Sonification" />
-    <meta name="twitter:description" content="The music of stars." />
-    <meta name="twitter:image" content="https://kitzeller.github.io/constellation-sonification/constellations.png" />
+    <meta property="og:title" content="Constellation Sonification"/>
+    <meta property="og:description" content="The music of stars."/>
+    <meta property="og:image" content="https://kitzeller.github.io/constellation-sonification/constellations.png"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://kitzeller.github.io/constellation-sonification"/>
+    <meta property="og:image:secure_url"
+          content="https://kitzeller.github.io/constellation-sonification/constellations.png"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:site" content="@kitzeller"/>
+    <meta name="twitter:creator" content="@kitzeller"/>
+    <meta name="twitter:domain" content="twitter.com/kitzeller"/>
+    <meta name="twitter:title" content="Constellation Sonification"/>
+    <meta name="twitter:description" content="The music of stars."/>
+    <meta name="twitter:image" content="https://kitzeller.github.io/constellation-sonification/constellations.png"/>
 
     <style>
         html, body {
@@ -48,7 +49,7 @@
             z-index: 9999;
         }
 
-        .overlay{
+        .overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -284,7 +285,7 @@
             // });
 
 
-                window.addEventListener("click", function () {
+            window.addEventListener("click", function () {
                 // We try to pick an object
                 var pickResult = scene.pick(scene.pointerX, scene.pointerY);
                 if (!pickResult.pickedMesh) return;
@@ -363,7 +364,7 @@
 
     });
 
-    function playNote(brightness){
+    function playNote(brightness) {
         // TODO: Better scale
         // Mapped to Apparent magnitude
         if (!brightness) return;
@@ -396,7 +397,7 @@
 
     function showAll(con) {
         for (let s of Object.values(starMap)) {
-                s.setEnabled(true);
+            s.setEnabled(true);
         }
         for (let c of Object.keys(starConsellations)) {
             for (let l of starConsellations[c]) {
