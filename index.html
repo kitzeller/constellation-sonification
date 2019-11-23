@@ -28,6 +28,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
+            cursor: grab;
         }
 
         #renderCanvas {
@@ -44,7 +45,6 @@
             font-size: 50px;
             text-align: center;
             font-family: monospace;
-            /*background-color: rgba(0, 1, 80, 0.8);*/
             background-image: url(https://snappygoat.com/b/e180cb63bb63dabbfdce2085a6d95dbd92e994e0);
             z-index: 9999;
         }
@@ -128,6 +128,13 @@
         var createScene = function () {
             // Create the scene space
             var scene = new BABYLON.Scene(engine);
+
+            scene.onPointerDown = () => {
+                scene.defaultCursor = "grabbing";
+            };
+            scene.onPointerUp = () => {
+                scene.defaultCursor = "grab";
+            };
 
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
