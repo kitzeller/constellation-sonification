@@ -243,7 +243,7 @@
                 if (!pickResult.pickedMesh) return;
                 if (!pickResult.pickedMesh.starConstellation) return;
                 // synth.triggerAttackRelease("C5", "8n");
-                hideAllBut(pickResult.pickedMesh.starConstellation)
+                //hideAllBut(pickResult.pickedMesh.starConstellation)
 
                 let nextAnimation;
                 let animationBox;
@@ -284,7 +284,7 @@
                         nextAnimation = function () {
                             sampler.triggerAttack(Math.floor(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness * 40));
                             scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, () => {
-                                showAll(pickResult.pickedMesh.starConstellation);
+                                //showAll(pickResult.pickedMesh.starConstellation);
                             });
                         }
                     }
