@@ -353,59 +353,15 @@
                 // synth.triggerAttackRelease("C5", "8n");
                 //hideAllBut(pickResult.pickedMesh.starConstellation)
 
-                let nextAnimation;
-                var xSlide = new BABYLON.Animation("xSlide", "scaling", 10, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                restartAnimation(constellationStars[pickResult.pickedMesh.starConstellation], loop);
 
-                var keyFramesP = [];
-
-                keyFramesP.push({
-                    frame: 0,
-                    value: new BABYLON.Vector3(5, 5, 5)
-                });
-
-                keyFramesP.push({
-                    frame: 15,
-                    value: new BABYLON.Vector3(10, 10, 10)
-                });
-
-                keyFramesP.push({
-                    frame: 25,
-                    value: new BABYLON.Vector3(1, 1, 1)
-                });
-                xSlide.setKeys(keyFramesP);
-
-                for (let i = constellationStars[pickResult.pickedMesh.starConstellation].length - 1; i > 0; i--) {
-
-                    if (nextAnimation) {
-                        const myNext = nextAnimation;
-                        let newNext = function () {
-                            playNote(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness);
-                            scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, myNext);
-                        };
-                        nextAnimation = newNext;
-                    } else {
-                        nextAnimation = function () {
-                            playNote(constellationStars[pickResult.pickedMesh.starConstellation][i].starBrightness);
-                            scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][i], [xSlide], 0, 25, false, 1, () => {
-                                // Very end
-                                if (loop) {
-                                    restartAnimation(constellationStars[pickResult.pickedMesh.starConstellation])
-                                }
-                                //showAll(pickResult.pickedMesh.starConstellation);
-                            });
-                        }
-                    }
-                }
-
-                scene.beginDirectAnimation(constellationStars[pickResult.pickedMesh.starConstellation][0], [xSlide], 0, 25, false, 1, nextAnimation);
-                playNote(constellationStars[pickResult.pickedMesh.starConstellation][0].starBrightness);
             });
 
             engine.hideLoadingUI();
             return scene;
         };
 
-        function restartAnimation(star) {
+        function restartAnimation(star, loop) {
             let nextAnimation;
             var xSlide = new BABYLON.Animation("xSlide", "scaling", 10, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
@@ -441,15 +397,16 @@
                         playNote(star[i].starBrightness);
                         scene.beginDirectAnimation(star[i], [xSlide], 0, 25, false, 1, () => {
                             // Very end
-                            restartAnimation(star);
+                            if (loop) {
+                                restartAnimation(star, true);
+                            }
                             //showAll(pickResult.pickedMesh.starConstellation);
                         });
                     }
                 }
             }
-
+            playNote(star[0].starBrightness);
             scene.beginDirectAnimation(star[0], [xSlide], 0, 25, false, 1, nextAnimation);
-            playNote(star.starBrightness);
         }
 
         /******* End of the create scene function ******/
